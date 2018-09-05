@@ -6,6 +6,7 @@ from oligo_barcode import *
 
 
 # TODO: use blockStarts in .bed file to display oligos for each gene
+# TODO: implement amplification strategy-specific oligo design
 
 
 ###################

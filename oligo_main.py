@@ -8,6 +8,8 @@ from oligo_barcode import *
 # TODO: use blockStarts in .bed file to display oligos for each gene
 # TODO: implement amplification strategy-specific oligo design
 
+# NOTE: working directory assumed to be /mnt/gtklab01/rachelle/oligo_data on atlas.cbis.nus.edu.sg
+
 
 ###################
 ##   VARIABLES   ##

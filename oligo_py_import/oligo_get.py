@@ -59,9 +59,10 @@ def get_oligos(*, oligos, features, out_dir, name,
     out_file = os.path.join(out_dir, name + ".bed")
     
     # if out_path doesn't exist, create it
-    if out_dir:
-        if not os.path.exists(out_dir):
-            os.makedirs(out_dir)
+##    if out_dir:
+##        if not os.path.exists(out_dir):
+##            os.makedirs(out_dir)
+    make_dir(dir_path = out_dir if out_dir else os.getcwd(), check = False)
     
     if strict:
 
@@ -81,9 +82,9 @@ def get_oligos(*, oligos, features, out_dir, name,
 
 
         # PART 2: REMOVE COORDINATES OF OVERLAPPED REGIONS (first 3 columns)
-        remove_file_col(delimiter = '\t', file_in = os.path.join(str(temp_path),
+        remove_file_col(delimiter = '\t', fname_in = os.path.join(str(temp_path),
                                                                  name + ".bed"),
-                        file_out = out_file, cols_to_remove = range(3))
+                        fname_out = out_file, cols_to_remove = range(3))
 
 
         # CLEAN UP: delete temporary directory if del_temp flag is raised
@@ -122,3 +123,5 @@ def get_common_ranges(*databases):
         common_ranges = common_ranges.intersect(db)
 
     return common_ranges
+
+

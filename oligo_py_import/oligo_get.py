@@ -59,9 +59,6 @@ def get_oligos(*, oligos, features, out_dir, name,
     out_file = os.path.join(out_dir, name + ".bed")
     
     # if out_path doesn't exist, create it
-##    if out_dir:
-##        if not os.path.exists(out_dir):
-##            os.makedirs(out_dir)
     make_dir(dir_path = out_dir if out_dir else os.getcwd(), check = False)
     
     if strict:

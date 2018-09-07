@@ -60,7 +60,7 @@ get_oligos(oligos = path_oligos,
            features = path_features,
            out_dir = path_out,
            name = project_name,
-           strict = True, del_temp = False, temp_suff = "temp")
+           strict = True, del_temp = False, temp_dir = path_temp)
 
 
 # NOTES ON EXECUTING 'assign_barcodes' FUNCTION
@@ -112,7 +112,3 @@ test_name = "test-strict-False"
 ##get_oligos(oligos = test_oligos, features = test_features,
 ##           out_dir = test_out, name = test_name,
 ##           strict = False, del_temp = False, temp_suff = test_temp)
-
-
-
-

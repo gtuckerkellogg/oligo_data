@@ -1,7 +1,7 @@
-import shutil
 import pybedtools
 
 from oligo_errors import *
+from oligo_gen import *
 
 
 # get oligos with at least one nucleotide that overlaps with at least one feature in all
@@ -14,14 +14,14 @@ from oligo_errors import *
 # KEYWORDS
 #   strict (bool): see docstring below for difference between True and False. Default value True
 #   del_temp (bool): if True, temporary files created by function will be deleted at end of run. Defaut value is True
-#   temp_suff (str): suffix for temporary folder. Default value is 'temp'.
+#   temp_dir (str): path to temporary directory (including name of temporary directory)
 # OUTPUTS
 #   Writes file with name specified by variable 'name'. Contains sequences of
 #   oligonucleotides with at least one nucleotide that overlaps with at least one
 #   feature in all specified feature databases. Also contains genome coordinates of
 #   oligonucleotides
 def get_oligos(*, oligos, features, out_dir, name,
-               strict = True, del_temp = True, temp_suff = "temp"):
+               strict = True, del_temp = True, temp_dir = ''):
 
     """
     Writes oligos with at least one nucleotide that overlaps with at least one feature
@@ -56,7 +56,7 @@ def get_oligos(*, oligos, features, out_dir, name,
     # read oligos .bed file into BedTool object
     oligos_bed = pybedtools.BedTool(oligos)
     # create output file path + name
-    out_file = "{}{}{}.bed".format(out_dir, '/' if out_dir else '', name)
+    out_file = os.path.join(out_dir, name + ".bed")
     
     # if out_path doesn't exist, create it
     if out_dir:
@@ -66,47 +66,28 @@ def get_oligos(*, oligos, features, out_dir, name,
     if strict:
 
         # PART 1: GET OLIGOS
-        #   TODO: create function
-        # create BedTool object from first feature database
-        final_ranges = pybedtools.BedTool(features[0])
         
         # successive overlaps of databases to find regions that are shared
         #   across features from ALL databases
-        for db in features[1:]:
-            db_bed = pybedtools.BedTool(db)
-            final_ranges = final_ranges.intersect(db_bed)
+        final_ranges = get_common_ranges(*features)
 
-        # get appropriate oligos
-        oligos_intersect = final_ranges.intersect(oligos_bed, wb = True)
+        # get oligos that overlap with ranges in final_ranges
+        oligos_intersected = final_ranges.intersect(oligos_bed, wb = True)
 
-        # create temporary directory to save intermediate results
-        #   TODO: google temporary file creation in python (probably in sys)
-        #       no need to worry about directory structure!
-        temp_path = "{}_{}".format(name, temp_suff)
-        if not os.path.exists(temp_path):
-            os.makedirs(temp_path)
-
-        # save intermediate results
-        oligos_intersect.saveas("{}/{}_temp.bed".format(temp_path, name))
+        # create temporary directory and save intermediate results
+        temp_path = make_temp_dir(temp_dir = temp_dir, del_dir = del_temp,
+                                  project_name = name)
+        oligos_intersected.saveas(os.path.join(str(temp_path), name + ".bed"))
 
 
-        # PART 2: REMOVE COORDINATES OF OVERLAPPED REGIONS (prettifying results)
-        # open file of intersected oligos + create output file
-        oligos_in = open("{}/{}_temp.bed".format(temp_path, name), 'r')
-        oligos_out = open(out_file, "w+")
+        # PART 2: REMOVE COORDINATES OF OVERLAPPED REGIONS (first 3 columns)
+        remove_file_col(delimiter = '\t', file_in = os.path.join(str(temp_path),
+                                                                 name + ".bed"),
+                        file_out = out_file, cols_to_remove = range(3))
 
-        # iterate through intersected oligos to remove coordinates of overlapped regions
-        for entry in oligos_in.readlines():
-            cols = entry.split('\t')[3:]
-            oligos_out.write('\t'.join(cols))
 
-        # close files
-        oligos_in.close()
-        oligos_out.close()
-
-        # delete temporary directory if del_temp flag is raised
-        if del_temp:
-            shutil.rmtree("{}".format(temp_path))
+        # CLEAN UP: delete temporary directory if del_temp flag is raised
+        temp_path.clean_up()
 
     else:
 
@@ -120,3 +101,24 @@ def get_oligos(*, oligos, features, out_dir, name,
         oligos_bed.saveas(out_file)
 
     return
+
+
+
+def get_common_ranges(*databases):
+
+    """
+    Accepts any number of paths to .bed files of database of features and outputs a
+    BedTool object with ranges common to ALL databases given
+    """
+    
+    if not databases:
+        raise Exception("get_common_ranges requires at least 1 database.")
+
+    common_ranges = pybedtools.BedTool(databases[0])
+
+    # successive overlaps to find ranges common to all databases
+    for db in databases[1:]:
+        db_bed = pybedtools.BedTool(db)
+        common_ranges = common_ranges.intersect(db)
+
+    return common_ranges

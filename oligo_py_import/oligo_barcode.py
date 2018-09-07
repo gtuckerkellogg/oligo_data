@@ -1,4 +1,5 @@
 from oligo_errors import *
+from oligo_gen import *
 
 # TODO: create file format for barcoded oligos
 

@@ -41,28 +41,31 @@ def join_ele(separator, *ele):
     return separator.join(ele)
 
 
-def make_dir(*, dir_path, path_exists_message, dir_desc = "directory"):
+def make_dir(*, dir_path, path_exists_message = '', dir_desc = "directory", check = True):
 
     """
     Generic function to check presence of directory (and confirm user choice if it exists)
     before allowing it to be made/used. Returns path to directory.
+
+    'path_exists_message' and 'dir_desc' are only used if 'check' is set to True.
     """
-    # continue requesting new directory path if specified path already exists.
+    # request new directory path if check = True and specified path already exists.
     #   Stop only when user explicitly instructs to use the specified directory
     #   OR user chooses a non-existent path
-    while os.path.exists(os.path.abspath(dir_path)):
-        query = input(join_ele('\n', "Directory '{}' already exists.".format(os.path.abspath(dir_path)),
-                      path_exists_message,
-                      "Press C to continue anyway. Press any other key to specify another directory. "))
-        # exit if user explicitly instructs to use existing directory
-        if query == 'C' or query == 'c':
-            break
-        # get new path to temporary directory
-        while True:
-            dir_path = input("Please provide another path for a {}:\n".format(dir_desc))
-            query = input("Confirm {} '{}'? (Y/N) ".format(dir_desc, os.path.abspath(dir_path)))
-            if query == 'Y' or query == 'y':
+    if check:
+        while os.path.exists(os.path.abspath(dir_path)):
+            query = input(join_ele('\n', "Directory '{}' already exists.".format(os.path.abspath(dir_path)),
+                          path_exists_message,
+                          "Press C to continue anyway. Press any other key to specify another directory. "))
+            # exit if user explicitly instructs to use existing directory
+            if query == 'C' or query == 'c':
                 break
+            # get new path to directory
+            while True:
+                dir_path = input("Please provide another path for a {}:\n".format(dir_desc))
+                query = input("Confirm {} '{}'? (Y/N) ".format(dir_desc, os.path.abspath(dir_path)))
+                if query == 'Y' or query == 'y':
+                    break
 
     # create directory
     if not os.path.exists(dir_path):

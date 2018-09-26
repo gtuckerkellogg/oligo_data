@@ -583,7 +583,7 @@ class SODId:
 
 def sort_sodsubseqs(*sodsubseqs, reverse=False) -> list:
     """
-    Sorts any number of SODSubSeq objects
+    Sorts any number of SODSubSeq objects by SODId (in order of oligo, pole, distance)
     :param sodsubseqs: SODSubSeq objects. Accepts any quantity
     :param reverse: bool. Whether to reverse sorting order
     :return: list. List of sorted SODSubSeqs

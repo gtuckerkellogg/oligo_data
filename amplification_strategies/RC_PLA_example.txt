@@ -1,0 +1,27 @@
+>> .SOD
+
+A_0_0	<>	target hybridisation sequence
+A_3_1	LINKERSEQUENCE	linker sequence
+A_3_2	CIRCLE_PART1_5'_COMP	sequence complementary to 5' of circle oligo 1
+A_3_3	<>	target barcode
+A_3_4	CIRCLE_PART2_3'_COMP	sequence complementary to 3' of circle oligo 2
+
+B_0_0	<<>>	target hybridisation sequence
+B_3_1	LINKERSEQUENCE	linker sequence
+B_3_2	CIRCLE_PART2_5'_COMP	sequence complementary to 5' of circle oligo 2
+B_3_3	<<>>	target barcode
+B_3_4	CIRCLE_PART1_3'_COMP	sequence complementary to 3' of circle oligo 1
+
+C_0_0	CIRCLE_PART1	circle oligo part 1
+D_0_0	CIRCLE_PART2	circle oligo part 2
+
+# A_x_x: sequences for probe
+# B_x_x: sequences for Ab-conjugated oligo (or, alt, whatever is opposite the probe
+#	NOTE: <target binding sequence> of Ab-conjugated oligo is basically the Ab
+# C_x_x: sequence(s) for rolling circle oligo part 1
+# D_x_x: sequence(s) for rolling circle oligo part 2
+
+# 1_2_3
+#	1: arbitrary molecule ID
+#	2: indicates whether subsequence is on 3' or 5' end of target hybridisation seq
+#	3: indicates positional distance from target hybridisation seq

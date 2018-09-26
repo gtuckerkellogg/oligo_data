@@ -1,0 +1,18 @@
+>> .SOD
+
+A_5_2	B	biotin moiety
+A_5_1	LINKER	linker
+A_0_0	<>	target hybridisation
+A_3_1	LINKER	linker
+A_3_2	<>	target barcode
+A_3_3	<<>>	linker
+A_3_4	OLIGO_5'_COMP	sequence complimentary to 5' of ligation oligo
+
+B_5_3	OLIGO_3'_COMP	sequence complimentary to 3' of ligation oligo
+B_5_2	<>	target barcode or common primer	
+B_5_1	LINKERSEQUENCE	linker
+B_0_0	<<>>	target hybridisation or Ab
+
+C_0_0	LIGATIONOLIGOSEQUENCE	ligation oligo sequence
+
+# Note: descriptions are optional (but encouraged) for non-blank subsequences

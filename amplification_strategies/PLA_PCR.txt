@@ -1,0 +1,18 @@
+>> .SOD
+
+A_0_0	<>	target hybridisation sequence
+A_3_1	<<>>	linker sequence
+A_3_2	<>	target barcode
+A_3_3	<>	sequence complementary to 5' of ligation oligo
+
+B_5_3	<>	sequence complementary to 3' of ligation oligo
+B_5_2	<>	target barcode or common primer
+B_5_1	<<>>	linker sequence
+B_0_0	<<>>	target hybridisation sequence
+
+C_0_0	<>	ligation oligo sequence
+
+# A_x_x: sequences for probe
+# B_x_x: sequences for Ab-conjugated oligo (or, alt, whatever is opposite the probe
+#	NOTE: <target binding sequence> of Ab-conjugated oligo is basically the Ab
+# C_x_x: sequence(s) for ligation oligo

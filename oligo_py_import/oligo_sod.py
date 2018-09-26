@@ -357,9 +357,9 @@ class SODOligo:
                 subseq_obj.id().distance += 1
 
         # create new SODId and assign everything
-        sod_subseq.id = SODId((self.id(), pole, new_distance))
-        sod_subseq.id.set_oligo(self)
-        sod_subseq.id.set_subseq(sod_subseq)
+        sod_subseq.set_id(SODId((self.id(), pole, new_distance)))
+        sod_subseq.id().set_oligo(self)
+        sod_subseq.id().set_subseq(sod_subseq)
         self.subseqs.append(sod_subseq)
 
     def combine_oligos(self, sod_oligo) -> None:
@@ -494,6 +494,9 @@ class SODSubSeq:
 
     def description(self) -> str:
         return self.subseq_description
+     
+    def set_id(self, new_sodid) -> None:
+        self.sodid = new_sodid
 
     def set_oligo(self, parent_oligo) -> None:
         self.sodoligo = parent_oligo

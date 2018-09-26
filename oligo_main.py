@@ -1,12 +1,15 @@
 import sys
 sys.path.insert(0, "./oligo_py_import")
+sys.path.insert(0, "../amplification_strategies")
+sys.path.insert(0, "../experiment_types")
 
 from oligo_get import *
-from oligo_barcode import *
+from oligo_design import *
 
 
 # TODO: use blockStarts in .bed file to display oligos for each gene
 # TODO: implement amplification strategy-specific oligo design
+# TODO: create function to extract oligo sequences from .sss files
 
 # NOTE: working directory assumed to be /mnt/gtklab01/rachelle/oligo_data on atlas.cbis.nus.edu.sg
 
@@ -15,6 +18,7 @@ from oligo_barcode import *
 ##   VARIABLES   ##
 ###################
 
+# # # # Variables for generating file of TARGET HYBRIDISATION SEQUENCES
 # dictionary of paths to feature databases
 all_features = {"EGR1": "../OligoMiner/20180228_EGR1_oligominer_u/egr1_promoter.bed",
                 "karpas_DMSO_H3K4me3": "../karpas_write/MACS/H3K4me3/20180813_DMSO/20180813_DMSO_peaks.bed",
@@ -28,12 +32,21 @@ path_temp = "temp"  # don't leave this empty
 path_out = ''       # leave as '' if output file is to be written to working directory, else provide path to desired output directory
 project_name = "EGR1_EGR1_oligos"
 
-
-
 # DO NOT MODIFY the following line
 path_features = [all_features[k] for k in all_features if k in selected_features]
 
 
+# # # # Variables for AMPLIFICATION STRATEGIES
+# can be used to build new strategy templates
+amp_templates = {"PEA_PCR": "amplification_strategies/PEA_PCR.txt",
+                 "PLA_PCR": "amplification_strategies/PLA_PCR.txt",
+                 "RC_PLA": "amplification_strategies/RC_PLA.txt"}
+
+# used to generate oligonucleotides
+amp_strategies = {"PEA_PCR": "amplification_strategies/PEA_PCR_example.txt",
+                  "PLA_PCR": "amplification_strategies/PLA_PCR_example.txt",
+                  "RC_PLA": "amplification_strategies/RC_PLA_example.txt",
+                  "example": "amplification_strategies/example.txt"}
 
 
 ####################
@@ -56,59 +69,38 @@ path_features = [all_features[k] for k in all_features if k in selected_features
 #   feature in all specified feature databases. Oligonucleotide sequences are indexed
 #   by genomic coordinates
 
-get_oligos(oligos = path_oligos,
-           features = path_features,
-           out_dir = path_out,
-           name = project_name,
-           strict = True, del_temp = False, temp_dir = path_temp)
+# get oligos that overlap with features of interest
+get_oligos(oligos=path_oligos,
+           features=path_features,
+           out_dir=path_out,
+           name=project_name,
+           strict=True, del_temp=False, temp_dir=path_temp)
 
 
-# NOTES ON EXECUTING 'assign_barcodes' FUNCTION
-#   Assigns barcodes to oligos
-# COMPULSORY INPUTS
-#   oligos (str): path to .bed file of oligos (one oligo per line)
-#   barcodes (str): path to file of barcodes
-#   barcode_reader (func): function to read barcodes from file
-#   out_dir (str): output directory
-#   name (str): project name; to be used as name for output file
-# OPTIONAL KEYWORD
-#   append_barcode (bool): appends barcode to oligo if True, else prepends it
-# OUTPUT
-#   .bed file indexed by oligos (per file given to function) with barcode
-#   id + sequence appended to each line of oligo
+# read oligo designs for desired strategy into SODFile object
+RC_PLA = read_sod(amp_strategies["RC_PLA"])
 
-assign_barcodes(oligos = "EGR1_EGR1_oligos.bed",
-                barcodes = "barcodes/bc25mer.240k.fasta",
-                barcode_reader = read_DeLOB_barcodes,
-                out_dir = "EGR1_barcodes_test",
-                name = "EGR1_barcodes_test",
-                append_barcode = True)
+# extract out SODOligo object containing design for desired oligo (in this case, oligo A)
+RC_PLA_A = RC_PLA.get_oligo('A')
 
+# print blank sub-sequences to be filled in (for viewing only, doesn't perform any function)
+RC_PLA_A_blank = RC_PLA_A.blank_subseqs(show=True)
 
+# create OligoBuilder object by feeding it the SODOligo object for the desired oligo
+RC_PLA_A_builder = OligoBuilder(RC_PLA_A)
 
+# read files with sequences to use into SeqFile objects
+#   Note that file readers provided in this example are defined in oligo_seq.py
+#   Instructions for customising file readers can be found in oligo_seq.py
+EGR1_hyb_seq = SeqFile("EGR1_EGR1_oligos.bed", file_reader=read_bedfile)
+barcodes = SeqFile("barcodes/bc25mer.240k.fasta", file_reader=read_DeLOB_barcodes)
 
+# specify which SeqFile object is for which sub-sequence
+RC_PLA_A_builder.add_seqfile("A_0_0", EGR1_hyb_seq)
+RC_PLA_A_builder.add_seqfile("A_3_3", barcodes)
 
+# create oligos and write to .sss file, TADAA!
+RC_PLA_A_SSS = RC_PLA_A_builder.create_oligos("EGR1_barcodes_test_RC_PLA_A_2.sss", out_dir="test_out")
 
-
-
-
-
-##############
-##   TEST   ##
-##############
-
-test_all_features = {"A": "test_in/a.bed",
-                 "B": "test_in/b.bed"}
-test_selected_features = ["A", "B"]
-test_features = [test_all_features[k] for k in test_all_features if \
-                 k in test_selected_features]
-
-test_oligos = "test_in/c.bed"
-test_temp = "test-temp"
-test_out = "test-out"
-test_name = "test-strict-False"
-
-# test
-##get_oligos(oligos = test_oligos, features = test_features,
-##           out_dir = test_out, name = test_name,
-##           strict = False, del_temp = False, temp_suff = test_temp)
+# RC_PLA_A_builder can be reused by providing different SeqFile objects
+# by re-executing OligoBuilder.add_seqfile() and OligoBuilder.create_oligos()

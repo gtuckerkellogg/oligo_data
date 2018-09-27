@@ -1,4 +1,3 @@
-# from oligo_errors import *
 from oligo_gen import *
 
 

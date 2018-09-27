@@ -1,8 +1,3 @@
-# import sys
-# import os
-
-# from oligo_errors import *
-# from oligo_gen import *
 from oligo_sod import *
 from oligo_sss import *
 from oligo_seq import *

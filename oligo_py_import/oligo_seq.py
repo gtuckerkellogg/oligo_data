@@ -8,6 +8,9 @@ from oligo_gen import *
 ###################
 
 
+# TODO: create SeqReader class for reading sequences instead of having separate functions
+#   to make a sequence reader and read the sequence file
+
 # all purpose function to read sequence files and store sequence as Seq objects in dict
 #   indexed by sequence ids
 def read_seq(fname, seq_coord, delimiter='\t', num_lines=1, id_gen=None) -> list:

@@ -72,6 +72,8 @@ class OligoBuilder:
 
     def add_seqfile(self, subseq_id, seqfile) -> None:
         """
+        If the subseq_id already has a SeqFile object assigned to it, it will be overwritten
+        with the newly given SeqFile object ('seqfile')
         :param subseq_id: string of ID of a SODSubSeq (e.g. 'A_0_0') to assign this file to
         :param seqfile: SeqFile object pointing to file with sequences
         :return: None

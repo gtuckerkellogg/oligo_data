@@ -228,7 +228,7 @@ class SODOligo:
         for subseq_obj in self.subseqs:
             subseq_obj.pretty_print(*header)
 
-    def filter_id(self, pole: int = None, distance: int = None) -> list:
+    def filter_id(self, pole=None, distance=None) -> list:
 
         """
         Returns list of SODSubSeq objects of subsequences at a given pole
@@ -238,8 +238,8 @@ class SODOligo:
         """
         output = []
         for subseq_obj in self.subseqs:
-            if (pole is None or subseq_obj.pole == pole) and\
-               (distance is None or subseq_obj.distance == distance):
+            if (pole is None or subseq_obj.pole() == pole) and \
+                    (distance is None or subseq_obj.distance() == distance):
                 output.append(subseq_obj)
         return output
 
@@ -494,7 +494,7 @@ class SODSubSeq:
 
     def description(self) -> str:
         return self.subseq_description
-     
+
     def set_id(self, new_sodid) -> None:
         self.sodid = new_sodid
 

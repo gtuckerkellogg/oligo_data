@@ -20,11 +20,14 @@ from oligo_gen import *
 #   feature in all specified feature databases. Also contains genome coordinates of
 #   oligonucleotides
 def get_oligos(*, oligos, features, out_dir, name,
-               strict=True, del_temp=True, temp_dir=''):
+               strict=True, del_temp=True, temp_dir='', sorted=True):
 
     """
     Writes oligos with at least one nucleotide that overlaps with at least one feature
     in all specified feature databases to file.
+
+    Assumes that files are sorted, which invokes a more efficient algorithm. If entries
+    in files are not sorted, set 'sorted' to False.
 
     Note: If oligo_Z is 10 nt long and is checked against 2 feature files, A.bed and
     B.bed, and overlaps with feature A1 in feature file A.bed over the first
@@ -61,30 +64,13 @@ def get_oligos(*, oligos, features, out_dir, name,
     make_dir(dir_path=out_dir, check=False)
     
     if strict:
-
-        # PART 1: GET OLIGOS
         
         # successive overlaps of databases to find regions that are shared
         #   across features from ALL databases
         common_ranges = get_common_ranges(*features)
 
         # get oligos that overlap with ranges in final_ranges
-        oligos_intersected = common_ranges.intersect(oligos_bed, wb=True)
-
-        # create temporary directory and save intermediate results
-        temp_path = make_temp_dir(temp_dir=temp_dir,
-                                  del_dir=del_temp,
-                                  project_name=name)
-        oligos_intersected.saveas(os.path.join(str(temp_path), name + ".bed"))
-
-        # PART 2: REMOVE COORDINATES OF OVERLAPPED REGIONS (first 3 columns)
-        remove_file_col(delimiter='\t',
-                        fname_in=os.path.join(str(temp_path), name + ".bed"),
-                        fname_out=out_file,
-                        cols_to_remove=range(3))
-
-        # CLEAN UP: delete temporary directory if del_temp flag is raised
-        temp_path.clean_up()
+        oligos_bed = oligos_bed.intersect(common_ranges, u=True, sorted=sorted)
 
     else:
 
@@ -94,10 +80,61 @@ def get_oligos(*, oligos, features, out_dir, name,
             db_bed = pybedtools.BedTool(db)
             oligos_bed = oligos_bed.intersect(db_bed, u=True)
 
-        # save intermediate results
-        oligos_bed.saveas(out_file)
+    # save intermediate results
+    oligos_bed.saveas(os.path.join(out_dir, out_file))
 
     return
+
+
+def pos_to_block_start(feature_data, *pos_coord) -> str:
+    """
+    Accepts any quantity of (<start>, <end>) tuple pairs that describe a block within
+    a bedfile feature.
+    :param feature_data: dictionary of feature data from bedfile
+    :param pos_coord: (<start>, <end>) tuple pairs, any quantity
+    :return: formatted string for bedfile entry of feature with specified blockstarts
+    """
+
+    # corral feature_data into dictionary to enable use of dict.get
+    feature_dict = dict((i, v) for i, v in enumerate(feature_data))
+
+    # get start and end positions of all blocks
+    starts, ends = zip(*pos_coord)
+
+    # provide default values for bedfile fields
+    fields_1 = ["Unknown", int(starts[0]), int(ends[-1]), "Unknown", 0, '+']
+    fields_2 = (0, 1,
+                max(int(feature_dict[2]), int(ends[-1])) - min(int(feature_dict[1]), int(starts[0])) + 1,
+                0)
+
+    # create bedfile entry (str)
+    return join_ele('\t', *map(lambda i: feature_dict.get(i, fields_1[i]), range(len(fields_1))),
+                    join_ele(',', *starts),
+                    join_ele(',', *ends),
+                    *fields_2)
+
+
+def make_oligo_blocks(fname, features, oligos, sorted=True):
+
+    features_bed = pybedtools.BedTool(features)
+    oligos_bed = pybedtools.BedTool(oligos)
+
+    out_bed = []
+
+    for feature in features_bed:
+
+        # create temporary bedtool object using feature to facilitate intersection, then intersect
+        feature_bed = pybedtools.BedTool(join_ele('\t', *feature), from_string=True)
+        feature_oligos = oligos_bed.intersect(feature_bed, u=True, sorted=sorted)
+
+        # retrieve coordinates of oligos
+        feature_oligos_coords = [tuple(int(i) for i in oligo[1:3]) for oligo in feature_oligos]
+
+        # generate bedfile entry
+        out_bed.append(pos_to_block_start(list(feature), *feature_oligos_coords))
+
+    out_bedfile = pybedtools.BedTool(join_ele('\n', out_bed), from_string=True)
+    out_bedfile.saveas(fname)
 
 
 def get_common_ranges(*databases):

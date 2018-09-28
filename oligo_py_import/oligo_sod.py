@@ -42,8 +42,6 @@ from oligo_seq import *
 #               # A: main oligo
 #               # B: either attached to Ab or another target
 
-# TODO: function to generate oligos and write to file (.sss?)
-
 
 ################
 ##    FILE    ##
@@ -116,7 +114,7 @@ class SODFile:
     def oligo_ids(self) -> list:
 
         """
-        Return list of oligo ids
+        :return: list of oligo ids
         """
         return list(self.oligos.keys())
 
@@ -186,8 +184,7 @@ class SODFile:
 
         # write comments
         if isinstance(comments, list) or isinstance(comments, tuple):
-            comments = join_ele('\n', *comments)
-        comments = replace_ele(comments, '\n', "\n# ")
+            comments = join_ele("\n# ", *comments)
         f.write("# " + comments)
 
         f.close()

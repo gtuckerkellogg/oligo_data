@@ -2,7 +2,7 @@ import math
 
 from oligo_gen import *
 
-# TODO: create file format for barcoded oligos
+
 #   .sss: sequence section source (arbitrary)
 #       - stores final sequences + section starts + section descriptions + section ids + section sources
 #       - Format (tab delimited):
@@ -19,7 +19,7 @@ from oligo_gen import *
 #       - Last rows contain source information
 #           - Each row corresponds with one source
 #           - Col 1: source ID (arbitrarily assigned, but usually in order of appearance)
-#           - Col 2: path to source file
+#           - Col 2: path to source file (not necessarily absolute)
 #           - Example:
 #                   source_001  C:/oligos.bed
 #                   source_002  C:/barcodes.txt

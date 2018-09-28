@@ -3,7 +3,11 @@ import re
 from oligo_gen import *
 from oligo_sss import *
 from oligo_seq import *
- 
+
+
+# TODO: YAML
+
+
 # .sod: Sequences of Oligo Design
 #   - stores template for constructing oligos
 #   - Format (tab delimited):
@@ -334,7 +338,7 @@ class SODOligo:
         """
         subseq_obj = self.get_subseq(subseq_id)
         if subseq_obj:
-            subseq_obj.sequence = subseq_seq
+            subseq_obj.subseq_sequence = subseq_seq
 
     def add_subseq(self, sod_subseq, pole, distance=None, index_start=1):
         """

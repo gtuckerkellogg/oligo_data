@@ -19,6 +19,7 @@ from oligo_design import *
 ###################
 
 # # # # Variables for generating file of TARGET HYBRIDISATION SEQUENCES
+# # Path variables should be modified according to working directory
 # dictionary of paths to feature databases
 all_features = {"EGR1": "../OligoMiner/20180228_EGR1_oligominer_u/egr1_promoter.bed",
                 "karpas_DMSO_H3K4me3": "../karpas_write/MACS/H3K4me3/20180813_DMSO/20180813_DMSO_peaks.bed",

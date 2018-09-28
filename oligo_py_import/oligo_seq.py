@@ -143,7 +143,7 @@ class SeqFile:
 
     # regenerates self.seq_list, and returns self.seq_list
     def read_seqs(self) -> list:
-        if not self.get_seqs():
+        if not self.file_reader:
             raise Exception("No sequence reader found. Please use function 'make_seq_reader' to generate a reader." +
                             "Then use SeqFile.set_seq_reader() to assign reader to ths SeqFile object." +
                             "Finally, execute SeqFile.read_seqs() again.")

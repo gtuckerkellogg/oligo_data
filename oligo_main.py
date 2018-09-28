@@ -77,13 +77,36 @@ get_oligos(oligos=path_oligos,
            strict=True, del_temp=False, temp_dir=path_temp)
 
 
-# read oligo designs for desired strategy into SODFile object
-RC_PLA = read_sod(amp_strategies["RC_PLA"])
+# if FROM_READYMADE is set to True, RC_PLA_A will be obtained from ready-made
+#   amplification strategy from 'amp_strategies'. Else, RC_PLA_A will be
+#   built from empty template. Either way, the final RC_PLA_A design is identical
+FROM_READYMADE = False
 
-# extract out SODOligo object containing design for desired oligo (in this case, oligo A)
-RC_PLA_A = RC_PLA.get_oligo('A')
+# starting from ready-made oligo design
+if FROM_READYMADE:
 
-# print blank sub-sequences to be filled in (for viewing only, doesn't perform any function)
+    # read oligo design for desired strategy into SODFile object
+    RC_PLA = read_sod(amp_strategies["RC_PLA"])
+    # extract out SODOligo object containing design for desired oligo (in this case, oligo A)
+    RC_PLA_A = RC_PLA.get_oligo('A')
+
+# creating new oligo design based on empty template
+else:
+
+    # read empty oligo design template for desired strategy into SODFile object
+    RC_PLA = read_sod(amp_templates["RC_PLA"])
+    # extract out SODOligo object containing design for desired oligo (in this case, oligo A)
+    RC_PLA_A = RC_PLA.get_oligo('A')
+
+    # provide sequences for blank fields
+    RC_PLA_A.replace_seq("A_3_1", "LINKERSEQUENCE")
+    RC_PLA_A.replace_seq("A_3_2", "CIRCLE_PART1_5'_COMP")
+    RC_PLA_A.replace_seq("A_3_4", "CIRCLE_PART2_3'_COMP")
+
+    
+# obtains blank sub-sequences and prints blank sub-sequences to be filled in
+#   (in this context, this statement is for viewing only and doesn't perform
+#   any useful function)
 RC_PLA_A_blank = RC_PLA_A.blank_subseqs(show=True)
 
 # create OligoBuilder object by feeding it the SODOligo object for the desired oligo
@@ -100,7 +123,7 @@ RC_PLA_A_builder.add_seqfile("A_0_0", EGR1_hyb_seq)
 RC_PLA_A_builder.add_seqfile("A_3_3", barcodes)
 
 # create oligos and write to .sss file, TADAA!
-RC_PLA_A_SSS = RC_PLA_A_builder.create_oligos("EGR1_barcodes_test_RC_PLA_A_2.sss", out_dir="test_out")
+RC_PLA_A_SSS = RC_PLA_A_builder.create_oligos("EGR1_barcodes_RC_PLA_A.sss", out_dir="test_out")
 
 # RC_PLA_A_builder can be reused by providing different SeqFile objects
 # by re-executing OligoBuilder.add_seqfile() and OligoBuilder.create_oligos()

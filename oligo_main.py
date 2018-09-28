@@ -1,7 +1,7 @@
 import sys
 sys.path.insert(0, "./oligo_py_import")
-sys.path.insert(0, "../amplification_strategies")
-sys.path.insert(0, "../experiment_types")
+sys.path.insert(0, "./amplification_strategies")
+sys.path.insert(0, "./experiment_types")
 
 from oligo_get import *
 from oligo_design import *

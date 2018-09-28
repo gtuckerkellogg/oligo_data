@@ -7,47 +7,6 @@ from oligo_seq import *
 # created 2018_09_26
 
 
-# Accepts IDs of subseqs to fill ('subseqs_id'), sequences to fill with ('sequences'),
-#   and a SODOligo object ('design_oligo'). Generates oligos based on 'design_oligo' and
-#   writes generated oligos to .sss file.
-# INPUTS
-#   design: SODOligo object specifying oligo design
-#   subseqs_id: list/tuple of sub-sequence IDs to fill (E.g. ('A_0_0', 'A_3_2'))
-#   sequences: list/tuple of sub-sequence sequences. Two-level.
-#       - Length of inner level should match length of 'subseqs_id'
-#       - User must ensure that order of seqeunces matches order of subseq ID in 'subseqs'
-#       - E.g. [('MAIN1_for_A_0_0', 'BARCODE1_for_A_3_2'),
-#               ('MAIN2_for_A_0_0', 'BARCODE2_for_A_3_2'),
-#               ('MAIN3_for_A_0_0', 'BARCODE3_for_A_3_2')]
-#   out_fname: name of .sss to be written
-#   out_dir: path to directory to which output .sss file is to be written
-# OUTPUTS
-#   Writes .sss file. Returns nothing.
-def generate_oligos(design_oligo: SODOligo, subseqs_id, sequences,
-                    out_fname: str, out_dir: str=''):
-
-    compulsory_subseqs = design_oligo.compulsory_subseqs()
-
-    # for SODSubSeq objects of compulsory sequences
-    for compulsory_subseq in compulsory_subseqs:
-        # if ID of compulsory subseq not found in user-provided list of subseq IDs
-        if not str(compulsory_subseq.id()) in subseqs_id:
-            raise Exception("Compulsory subsequence '{}' needs to be filled.".format(str(compulsory_subseq.id())))
-
-    # create ((<subseq id>, <sequence>), ..., (<subseq id>, <sequence>)) tuple for each
-    #   oligonucleotide to be generated
-    mapped_seqs = tuple(map(lambda seqs: tuple(zip(subseqs_id, *transpose(seqs))),
-                            sequences))
-
-    output_sss = SSSFile(out_fname)
-    for subseqs in mapped_seqs:
-        output_sss.add_seq(design_oligo.build_oligo(*subseqs, sss=True))
-
-    output_sss.write(out_fname, out_dir=out_dir)
-
-    return
-
-
 class OligoBuilder:
 
     def __init__(self, sodoligo):

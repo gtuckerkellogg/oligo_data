@@ -1,0 +1,121 @@
+---
+metadata:  # do not modify this line
+
+  file type: SOD  # required. Do not modify this line.
+  experiment: Rolling Circle Proximity Ligation Assay  # associated your design with an experiment. required for comprehension
+  description: Oligo designs for RC-PLA  # describe the design, including any modifications to the original. optional, but recommended.
+  notes: > # notes on execution etc. optional. Start with '>' for multi-line notes (works for any field).
+    <sequence> field has priority over <reverse complement> or <identical> field.
+    <identical> field is not used in this design, but it functions similarly to
+    <reverse complement> field in that it points to another sub-sequence (except, in
+    the case of <identical>, it points to a sequence to copy whole-sale, not take the
+    reverse compelement of).
+
+
+oligos:  # do not modify this line
+
+  # oligos can have boring names (e.g. 'A', 'B') or more descriptive names (e.g. 'target-binding', 'ab-conjugate')
+  #  - the only requirement is that they are UNIQUE
+  A:
+    # <description> field for oligos is optional and free for all
+    description: target-binding oligo (probe)
+    # keys at this level must be 0, 3, or 5 to indicate whether the sub-sequences contained are
+    #  on the 3' (3) or 5' (5) side of the main sequence (0)
+    0:
+      # keys at this level describe the distance of a sub-sequence from main (0), and must be numerical
+      #  - pole = 0 should only have ONE sub-sequence enty at this level, which is 0
+      0:
+        # <sequence> field is REQUIRED and accepts only valid ATGC/atgc strings or '<>' or '<<>>'
+        #  - <>: required sequence, must be filled in before calling OligoBuilder.build_oligos()
+        sequence: <>
+        # <description> field for sub-sequences is optional and free-for-all, same as the
+        #  <description> field for oligos
+        #  - any...descriptive...description will do. this field is for the benefit of humans only.
+        description: target hybridisation sequence
+    3:
+      # 1 describes the sub-sequence closest to the main-sequence on a given pole (here, 3').
+      #  - each increase of 1 to distance indicates the next closest sub-sequence
+      1:
+        # <<>>: optional sub-sequence, will be ignored during execution of
+        #  OligoBuilder.build_oligo() if not filled in
+        sequence: <<>>
+        description: linker sequence
+      2:
+        # reverse complement field can be uesd to point to a sub-sequence from which to
+        #  automatically generate a reverse complement to avoid errors associated with
+        #  manual conversion/sequence entry.
+        #  - a sub-sequence ID is always in the following format:
+        #     - <oligo_id>_<pole (3 or 5 or 0)>_<distance from main> (see example below)
+        reverse complement: C_5_1
+        description: sequence complementary to 5' of circle oligo 1
+      3:
+        sequence: <>
+        description: target barcode
+      4:
+        # as referring to a sub-sequence by its ID is risky as the ID may change due to
+        #  rearrangements of sequences to build new designs, using an alias simplifies matters
+        #  - aliases are more readable 'ID's associated with a sequence so referring to a
+        #     sub-sequence by its descriptive alias is more intuitive
+        #  - aliases are also more stable as they are associated directly with a sub-sequence
+        #     and not its position relative to main (X_0_0)
+        reverse complement: _CIRCLE02-3_
+        description: sequence complementary to 3' of circle oligo 2
+
+  B:
+    description: second target-binding oligo OR Ab-conjugated oligo
+    0:
+      0:
+        sequence: <<>>
+        description: target hybridisation sequence
+    3:
+      1:
+        sequence: <<>>
+        description: linker sequence
+      2:
+        reverse complement: D_5_1  # example of non-recommended use of ID
+        description: sequence complementary to 5' of circle oligo 2
+      3:
+        sequence: <<>>
+        description: target barcode
+      4:
+        reverse compelement: _CIRCLE01-3_  # example of recommended use of alias
+        description: sequence complementary to 3' of circle oligo 1
+
+
+  C:
+    description: circle oligo 1
+    5:
+      1:
+        # <alias> field, like <description>, is optional
+        #  - aliases MUST begin with an underscore ('_')
+        #  - ending with an underscore is optional (but visually more coherent)
+        #  - aliases don't necessarily have to be used in <reverse complement> or <identical>
+        #     fields so they can (with reason) optionally replace description
+        alias: _CIRCLE01-5_
+        sequence: <>
+        description: complementary to A_3_2
+    0:
+      0:
+        sequence: <>
+        description: linker
+    3:
+      1:
+        alias: _CIRCLE01-3_
+        sequence: <>
+        description: complementary to B_3_4
+
+  D:
+    description: circle oligo 2
+    5:
+      1:
+        sequence: <>
+        description: complementary to B_3_2
+    0:
+      0:
+        sequence: <>
+        description: linker
+    3:
+      1:
+        alias: _CIRCLE02-3_
+        sequence: <>
+        description: complementary to A_3_4

@@ -1,0 +1,70 @@
+A:
+  0:
+    0:
+      description: target hybridisation sequence
+      sequence: <>
+  3:
+    1:
+      description: linker sequence
+      sequence: AAAATTTT
+    2:
+      description: sequence complementary to 5' of circle oligo 1
+      reverse complement: C_5_1
+    3:
+      description: target barcode
+      sequence: <>
+    4:
+      description: sequence complementary to 3' of circle oligo 2
+      reverse complement: _CIRCLE02-3_
+B:
+  0:
+    0:
+      description: target hybridisation sequence
+      sequence: <<>>
+  3:
+    1:
+      description: linker sequence
+      sequence: <<>>
+    2:
+      description: sequence complementary to 5' of circle oligo 2
+      reverse complement: D_5_1
+    3:
+      description: target barcode
+      sequence: <<>>
+    4:
+      description: sequence complementary to 3' of circle oligo 1
+C:
+  0:
+    0:
+      description: linker
+      sequence: <>
+  3:
+    1:
+      alias: _CIRCLE01-3_
+      description: complementary to B_3_4
+      sequence: CCCCGGGG
+  5:
+    1:
+      alias: _CIRCLE01-5_
+      description: complementary to A_3_2
+      sequence: CCCCAAAA
+D:
+  0:
+    0:
+      description: linker
+      sequence: <>
+  3:
+    1:
+      alias: _CIRCLE02-3_
+      description: complementary to A_3_4
+      sequence: CCCCTTTT
+  5:
+    1:
+      alias: _CIRCLE02-5_
+      description: complementary to B_3_2
+      sequence: CCCCCCCC
+metadata:
+  description: Oligo designs for RC-PLA
+  experiment: Rolling Circle Proximity Ligation Assay
+  file type: SOD
+  notes: <sequence> field has priority over <reverse complement> field.

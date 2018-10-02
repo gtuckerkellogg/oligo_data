@@ -1,6 +1,6 @@
 import pybedtools
 
-from oligo_gen import *
+from .oligo_gen import *
 
 
 # get oligos with at least one nucleotide that overlaps with at least one feature in all

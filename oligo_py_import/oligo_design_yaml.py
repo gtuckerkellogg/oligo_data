@@ -1,4 +1,4 @@
-from oligo_sod import *
+from oligo_sodyaml import *
 from oligo_sss import *
 from oligo_seq import *
 
@@ -18,8 +18,37 @@ class OligoBuilder:
         for sodsubseq in self.sodoligo.blank_subseqs():
             self.blank_sodsubseqs[str(sodsubseq.id())] = None
 
+    ''' GETTER FUNCTIONS (BASIC) '''
+
     def oligo(self) -> SODOligo:
         return self.sodoligo
+
+    def get_seqfile(self, subseq_id):
+        """
+        :param subseq_id: accepts an SODSubSeq ID (string, tuple, or SODId object are okay)
+        :return: SeqFile object that was assigned to the given sub-sequence, or None if no
+            object was assigned
+        """
+        for blank_subseq in self.oligo().blank_subseqs():
+            curr_subseq_id = blank_subseq.id()
+            if curr_subseq_id == subseq_id:
+                return self.blank_sodsubseqs[str(curr_subseq_id)]
+        print("No SeqFile object was found for sub-sequence ID {}.".format(str(subseq_id)))
+
+    ''' BOOLEAN FUNCTIONS '''
+
+    def compulsory_seqs_filled(self) -> bool:
+        unfilled_subseqs = []
+        for subseq in self.oligo().compulsory_subseqs():
+            if self.blank_sodsubseqs[str(subseq.id())] is None:
+                unfilled_subseqs.append(str(subseq.id()))
+        if not unfilled_subseqs:
+            return True
+        print("The following compulsory sub-sequences were not provided: {}".format(join_ele(', ',
+                                                                                             unfilled_subseqs)))
+        return False
+
+    ''' SETTER AND MODIFIER FUNCTIONS '''
 
     def set_main(self, subseq_id) -> None:
         self.main_subseq = self.oligo().get_subseq(subseq_id)
@@ -39,39 +68,14 @@ class OligoBuilder:
         self.blank_sodsubseqs[subseq_id] = seqfile
         return
 
-    def get_seqfile(self, subseq_id):
-        """
-        :param subseq_id: accepts an SODSubSeq ID (string, tuple, or SODId object are okay)
-        :return: SeqFile object that was assigned to the given sub-sequence, or None if no
-            object was assigned
-        """
-        for blank_subseq in self.oligo().blank_subseqs():
-            curr_subseq_id = blank_subseq.id()
-            if curr_subseq_id == subseq_id:
-                return self.blank_sodsubseqs[str(curr_subseq_id)]
-        print("No SeqFile object was found for sub-sequence ID {}.".format(str(subseq_id)))
+    ''' DATA REPACKAGING AND GENERATION FUNCTIONS '''
 
-    def compulsory_seqs_filled(self):
-        unfilled_subseqs = []
-        for subseq in self.oligo().compulsory_subseqs():
-            if self.blank_sodsubseqs[str(subseq.id())] is None:
-                unfilled_subseqs.append(str(subseq.id()))
-        if not unfilled_subseqs:
-            return True
-        print("The following compulsory sub-sequences were not provided: {}".format(join_ele(', ',
-                                                                                             unfilled_subseqs)))
-        return False
-
-    # INPUTS
-    #   name (str): name of SSSFile object to be created. Will be used during writing.
-    #   out_dir (str): path to directory to write file. Optional if 'write' is set to False
-    #   write (bool): indicates whether to write newly created SSSFile object into .sss file
     def create_oligos(self, name: str, out_dir: str ='', write: bool =True) -> SSSFile:
         """
         Generates oligos.
-        :param name: str. Name of SSSFile to generate.
+        :param name: str. Name of SSSFile to generate. Will be used during writing.
         :param out_dir: str. Directory to write SSSFile object to if write is set to True. Default: <working directory>
-        :param write: bool. Writes SSSFile object to file if set to True. Default: True
+        :param write: bool. SSSFile object to be written to file if set to True. Default: True
         :return: SSSFile object.
         """
 

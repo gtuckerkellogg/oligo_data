@@ -1,4 +1,4 @@
-from oligo_gen import *
+from .oligo_gen import *
 
 
 ###################
@@ -111,7 +111,11 @@ class SeqFile:
     def __init__(self, fname, seq_list=None, file_type=None, file_reader=None, use_only=None):
 
         self.name = fname
-        self.use_only = use_only
+        # use_only indicates that this should be the only sequence returned regardless of
+        #   which index is requested
+        self.use_only = use_only  # if provided, should be a string
+        # file_type is useful if file_reader is not provided and a default reader for
+        #   the given file type already exists
         self.ftype = file_type if file_type else os.path.splitext(fname)[0][1:]
 
         self.file_reader = file_reader if file_reader \

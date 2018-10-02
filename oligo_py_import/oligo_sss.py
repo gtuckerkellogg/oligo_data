@@ -85,13 +85,17 @@ class SSSFile:
                                         order=i,
                                         sssfile=self))
 
-    def get_src_path(self, src_id):
+    ''' GETTER FUNCTIONS (BASIC) '''
+
+    def get_src_path(self, src_id) -> str:
         return None if (not self.sources_id and not self.sources_path) else\
             self.sources_id[src_id]
 
-    def get_src_id(self, src_path):
+    def get_src_id(self, src_path) -> str:
         return None if (not self.sources_path and not self.sources_id) else\
             self.sources_path[src_path]
+
+    ''' GETTER FUNCTIONS (PROCESSED) '''
 
     def search(self, query, *query_types, exact=False):
 
@@ -125,7 +129,7 @@ class SSSFile:
                         break
         return output
 
-    def search_seq(self, query, sub_only=False, exact=False):
+    def search_seq(self, query, sub_only=False, exact=False) -> dict:
 
         """
         Accepts a query for a sequence or main sequence, exact length or not.
@@ -157,13 +161,50 @@ class SSSFile:
                         break
         return output
 
-    def search_desc(self, query):
+    def seq_at_index(self, *indices, index_start=0) -> dict:
 
         """
+        Get sequences at given index (i.e. row number). Returns a dictionary where keys
+        are indices and values are SSSSeq objects.
         """
-        pass
 
-    def write(self, fname, out_dir=''):
+        output = {}
+        for i in indices:
+            i -= index_start
+            try:
+                output[i] = self.seqs[i]
+            except IndexError:
+                continue
+        return output
+
+    ''' SETTER AND MODIFIER FUNCTIONS '''
+
+    def add_seq(self, sssseq_obj) -> None:
+        self.seqs.append(sssseq_obj)
+        sssseq_obj.assign_sssfile(self)
+
+    def recompile_sources(self) -> None:
+        new_sources = [None]
+        leading_zeroes = math.ceil(math.log(len(self.seqs), 10))
+
+        # for each sequence in file
+        for seq in self.seqs:
+            # for each subsequence in file
+            for subseq in seq.subseqs:
+                # if path of source of current subsequence not already in new_sources
+                if not subseq.src_path() in new_sources:
+                    # add to path
+                    new_sources.append(subseq.src_path())
+                # generate new id name
+                new_src_id = "source_{}".format(str(new_sources.index(subseq.src_path())).zfill(leading_zeroes))
+                subseq.subseq_src_id = new_src_id
+        self.sources_id = dict(("source_{}".format(str(i).zfill(leading_zeroes)), v)
+                               for i, v in enumerate(new_sources))
+        self.sources_path = invert_dict(self.sources_id)
+
+    ''' DATA REPACKAGING AND GENERATION FUNCTIONS '''
+
+    def write(self, fname, out_dir='') -> None:
 
         """
         Writes SSSFile object to .sss file.
@@ -182,45 +223,6 @@ class SSSFile:
             f.write(join_ele('\t', *source) + '\n')
 
         f.close()
-
-    def seq_at_index(self, *indices, index_start=0):
-
-        """
-        Get sequences at given index (i.e. row number). Returns a dictionary where keys
-        are indices and values are SSSSeq objects.
-        """
-
-        output = {}
-        for i in indices:
-            i -= index_start
-            try:
-                output[i] = self.seqs[i]
-            except IndexError:
-                continue
-        return output
-
-    def add_seq(self, sssseq_obj):
-        self.seqs.append(sssseq_obj)
-        sssseq_obj.assign_sssfile(self)
-
-    def recompile_sources(self):
-        new_sources = [None]
-        leading_zeroes = math.ceil(math.log(len(self.seqs), 10))
-
-        # for each sequence in file
-        for seq in self.seqs:
-            # for each subsequence in file
-            for subseq in seq.subseqs:
-                # if path of source of current subsequence not already in new_sources
-                if not subseq.src_path() in new_sources:
-                    # add to path
-                    new_sources.append(subseq.src_path())
-                # generate new id name
-                new_src_id = "source_{}".format(str(new_sources.index(subseq.src_path())).zfill(leading_zeroes))
-                subseq.subseq_src_id = new_src_id
-        self.sources_id = dict(("source_{}".format(str(i).zfill(leading_zeroes)), v)
-                               for i, v in enumerate(new_sources))
-        self.sources_path = invert_dict(self.sources_id)
         
 
 class SSSSeq:
@@ -259,30 +261,16 @@ class SSSSeq:
 
     def __repr__(self):
         return self.seq()
+
+    ''' GETTER FUNCTIONS (BASIC) '''
     
-    def seq(self):
+    def seq(self) -> str:
         return self.seq_sequence
 
-    def get_sssfile(self):
+    def get_sssfile(self) -> SSSFile:
         return self.sssfile
 
-    def assign_sssfile(self, sssfile):
-        if not self.sssfile:
-            self.sssfile = sssfile
-        else:
-            raise Exception("This SSSSeq object already belongs to {}.".format(self.sssfile.name))
-
-    def flatten_subseqs(self, source_id=False):
-        
-        """
-        Flattens sub-sequences data into single level list, returns the list. Each element is a new subsequence.
-        Generally for use in writing to file.
-        """
-
-        output = []
-        for subseq in self.subseqs:
-            output.append(subseq.flatten(source_id=source_id))
-        return output
+    ''' GETTER FUNCTIONS (PROCESSED) '''
 
     def get_fields(self, *fields):
 
@@ -303,12 +291,12 @@ class SSSSeq:
                        "source": lambda subseq: subseq.src()}
 
         output = {}
-        
+
         # iterate through all subsequences
         for subseq in self.subseqs:
-            
+
             subseq_data = {}
-            
+
             # get data for each field requested
             for field in fields:
                 subseq_data[field] = field_types[field](subseq)
@@ -317,16 +305,6 @@ class SSSSeq:
             output[subseq.order] = subseq_data
 
         return output
-
-    def add_subseq(self, ssssubseq):
-        """
-        :type ssssubseq: SSSSubSeq
-        """
-        self.subseqs.append(ssssubseq)
-
-    def assign_sssseq_to_subseqs(self):
-        for subseq in self.subseqs:
-            subseq.assign_sssseq(self)
 
     def get_subseqs_by_index(self, index_start=0, *i):
         """
@@ -340,6 +318,38 @@ class SSSSeq:
         for subseq_order in i:
             output.extend(list(filter(lambda x: x.order() == subseq_order-index_start,
                                       self.subseqs)))
+        return output
+
+    ''' SETTER AND MODIFIER FUNCTIONS '''
+
+    def assign_sssfile(self, sssfile) -> None:
+        if not self.sssfile:
+            self.sssfile = sssfile
+        else:
+            raise Exception("This SSSSeq object already belongs to {}.".format(self.sssfile.name))
+
+    def assign_sssseq_to_subseqs(self):
+        for subseq in self.subseqs:
+            subseq.assign_sssseq(self)
+
+    def add_subseq(self, ssssubseq):
+        """
+        :type ssssubseq: SSSSubSeq
+        """
+        self.subseqs.append(ssssubseq)
+
+    ''' DATA REPACKAGING AND GENERATION FUNCTIONS '''
+
+    def flatten_subseqs(self, source_id=False):
+        
+        """
+        Flattens sub-sequences data into single level list, returns the list. Each element is a new subsequence.
+        Generally for use in writing to file.
+        """
+
+        output = []
+        for subseq in self.subseqs:
+            output.append(subseq.flatten(source_id=source_id))
         return output
 
 
@@ -360,23 +370,16 @@ class SSSSubSeq:
     def __repr__(self):
         return self.seq()
 
-    def get_sssseq(self):
-        return self.sssseq
+    ''' GETTER FUNCTIONS (BASIC) '''
+
+    def id(self):
+        return self.subseq_id
 
     def seq(self):
         """
         Returns string of self's sequence
         """
         return self.subseq_sequence
-
-    def assign_sssseq(self, new_sssseq):
-        if not self.sssseq:
-            self.sssseq = new_sssseq
-        else:
-            raise Exception("This subsequence already belongs to {}".format(self.sssseq))
-
-    def sssfile(self):
-        return self.sssseq().sssfile()
 
     def order(self):
         return self.subseq_order
@@ -390,6 +393,9 @@ class SSSSubSeq:
     def pos(self):
         return self.start(), self.end()
 
+    def description(self):
+        return self.subseq_description
+
     def src_id(self):
         return self.subseq_src_id if self.subseq_src_id else \
             self.get_sssseq().get_sssfile().get_src_id(self.src_path()) if self.subseq_src_path else None
@@ -398,15 +404,27 @@ class SSSSubSeq:
         return self.subseq_src_path if self.subseq_src_path else \
             self.get_sssseq().get_sssfile().get_src_path(self.src_id()) if self.subseq_src_id else None
 
-    def id(self):
-        return self.subseq_id
+    def get_sssseq(self):
+        return self.sssseq
 
-    def description(self):
-        return self.subseq_description
+    def get_sssfile(self):
+        return self.get_sssseq().get_sssfile()
+
+    ''' GETTER FUNCTIONS (PROCESSED) '''
 
     # 'source_id' indicates whether to substitute out path (str) with assigned ID of source
     def get_sssfile_fields(self, source_id=False):
         return self.start(), self.description(), self.id(), (self.src_id() if source_id else self.src_path())
+
+    ''' SETTER AND MODIFIER FUNCTIONS '''
+
+    def assign_sssseq(self, new_sssseq):
+        if not self.sssseq:
+            self.sssseq = new_sssseq
+        else:
+            raise Exception("This subsequence already belongs to {}".format(self.sssseq))
+
+    ''' DATA REPACKAGING AND GENERATION FUNCTIONS '''
 
     def flatten(self, source_id=False):
         return join_ele('\t', *self.get_sssfile_fields(source_id=source_id))

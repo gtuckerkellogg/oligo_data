@@ -1,14 +1,11 @@
 from oligo_py_import.oligo_get import *
-from oligo_py_import.oligo_design_yaml import *
+from oligo_py_import.p35.oligo_design_yaml_p35 import *
 
 
 # TODO: use blockStarts in .bed file to display oligos for each gene
 # TODO: create function to extract oligo sequences (and sub-sequences) from .sss files?
 
 # NOTE: working directory assumed to be /mnt/gtklab01/rachelle/oligo_data on atlas.cbis.nus.edu.sg
-
-# NOTE: This project is written with Python 3.7 and cannot be compiled by Python 3.5 or lower.
-#   A Python 3.5-compatible version is currently in development.
 
 ###################
 ##   VARIABLES   ##
